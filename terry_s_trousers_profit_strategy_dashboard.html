@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terry's Trousers - Executive Profit Strategy Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            accent: '#38bdf8',
+                        },
+                        darkbg: '#080c14',
+                        cardbg: 'rgba(15, 23, 42, 0.75)',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: var(--page-bg, #080c14);
+            color: var(--page-text, #f8fafc);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .glass-panel {
+            background: var(--panel-bg, rgba(15, 23, 42, 0.75));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border, rgba(255, 255, 255, 0.08));
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .glow-emerald {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Custom Range Slider styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: var(--slider-track, #1e293b);
+            height: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--panel-border, rgba(255, 255, 255, 0.1));
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: var(--thumb-color, #10b981);
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--thumb-color, #10b981);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        /* Theme Variants */
+        .theme-obsidian {
+            --page-bg: #06090e;
+            --page-text: #f8fafc;
+            --panel-bg: rgba(13, 19, 33, 0.82);
+            --panel-border: rgba(255, 255, 255, 0.09);
+            --slider-track: #1e293b;
+            --thumb-color: #10b981;
+        }
+
+        .theme-navy {
+            --page-bg: #0f172a;
+            --page-text: #f1f5f9;
+            --panel-bg: rgba(30, 41, 59, 0.85);
+            --panel-border: rgba(148, 163, 184, 0.15);
+            --slider-track: #334155;
+            --thumb-color: #38bdf8;
+        }
+
+        .theme-editorial {
+            --page-bg: #0f1412;
+            --page-text: #f3f4f6;
+            --panel-bg: rgba(20, 29, 26, 0.88);
+            --panel-border: rgba(52, 211, 153, 0.15);
+            --slider-track: #273732;
+            --thumb-color: #34d399;
+        }
+
+        .theme-terracotta {
+            --page-bg: #140d0b;
+            --page-text: #fef2f2;
+            --panel-bg: rgba(31, 19, 16, 0.85);
+            --panel-border: rgba(248, 113, 113, 0.15);
+            --slider-track: #3c241e;
+            --thumb-color: #f97316;
+        }
+    </style>
+</head>
+<body class="theme-obsidian min-h-screen pb-16">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-white/10 glass-panel sticky top-0 z-50 px-4 lg:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-vest"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-xl tracking-tight">Terry's Trousers</h1>
+                        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">Executive Suite</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Profit Growth & Scenario Simulation Engine</p>
+                </div>
+            </div>
+
+            <!-- Theme Switcher & Actions -->
+            <div class="flex items-center gap-3 flex-wrap justify-center">
+                <div class="flex items-center bg-slate-900/80 p-1 rounded-xl border border-white/10 text-xs">
+                    <span class="text-slate-400 px-2 font-medium">Theme:</span>
+                    <button onclick="setTheme('obsidian')" id="btn-theme-obsidian" class="px-2.5 py-1 rounded-lg text-emerald-400 font-semibold bg-emerald-500/20 border border-emerald-500/30 transition">Obsidian</button>
+                    <button onclick="setTheme('navy')" id="btn-theme-navy" class="px-2.5 py-1 rounded-lg text-slate-400 font-medium hover:text-white transition">Navy</button>
+                    <button onclick="setTheme('editorial')" id="btn-theme-editorial" class="px-2.5 py-1 rounded-lg text-slate-400 font-medium hover:text-white transition">Editorial</button>
+                    <button onclick="setTheme('terracotta')" id="btn-theme-terracotta" class="px-2.5 py-1 rounded-lg text-slate-400 font-medium hover:text-white transition">Terracotta</button>
+                </div>
+
+                <button onclick="resetToBaseline()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-white/10 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left text-slate-400"></i> Reset Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 pt-8 space-y-8">
+
+        <!-- Strategy Presets Banner -->
+        <section class="glass-panel rounded-2xl p-6 border border-white/10">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold flex items-center gap-2 text-white">
+                        <i class="fa-solid fa-bolt text-amber-400"></i> High-Impact Profit Strategies
+                    </h2>
+                    <p class="text-xs text-slate-400">Click a scenario preset based on Terry's Trousers empirical audit data to see projected profit lift.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400 font-medium">Active Preset:</span>
+                    <span id="active-preset-badge" class="text-xs font-bold bg-slate-800 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30">
+                        Baseline (Current State)
+                    </span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <button onclick="applyPreset('baseline')" class="preset-btn group p-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-white/10 text-left transition relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-slate-300">1. Baseline</span>
+                        <i class="fa-solid fa-circle-dot text-emerald-400 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-400">Current performance across 46.1k sessions & 30.2% return rate.</p>
+                </button>
+
+                <button onclick="applyPreset('mobile_checkout')" class="preset-btn group p-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-white/10 text-left transition">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-sky-400">2. Mobile Optimization</span>
+                        <i class="fa-solid fa-mobile-screen-button text-sky-400 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-400">Bridge mobile CVR gap (2.27% → 3.8%) with Express Checkout.</p>
+                </button>
+
+                <button onclick="applyPreset('returns_reduction')" class="preset-btn group p-3.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-white/10 text-left transition">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-emerald-400">3. Fit & Sizing Fix</span>
+                        <i class="fa-solid fa-boxes-packing text-emerald-400 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-slate-400">Cut Baggy Cargo & Slim Denim returns (30.2% → 18.0%).</p>
+                </button>
+
+                <button onclick="applyPreset('max_growth')" class="preset-btn group p-3.5 rounded-xl bg-gradient-to-br from-emerald-950/60 to-teal-950/60 hover:from-emerald-900/80 hover:to-teal-900/80 border border-emerald-500/40 text-left transition">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-amber-300">4. Combined Max Profit</span>
+                        <i class="fa-solid fa-rocket text-amber-300 text-xs"></i>
+                    </div>
+                    <p class="text-xs text-emerald-200/70">Execute all 3 strategic pillars for maximum gross profit.</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- Core Calculator & Analytics Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Left Controls Column (5 cols) -->
+            <section class="lg:col-span-5 space-y-6">
+                <div class="glass-panel rounded-2xl p-6 space-y-6">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                        <h3 class="font-bold text-base text-white flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-emerald-400"></i> Financial Variables
+                        </h3>
+                        <span class="text-xs text-slate-400">Drag to test scenarios</span>
+                    </div>
+
+                    <!-- Input 1: Web Traffic -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-sessions" class="font-semibold text-slate-300">Annual Website Traffic (Sessions)</label>
+                            <span id="display-sessions" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">46,170</span>
+                        </div>
+                        <input type="range" id="input-sessions" min="10000" max="100000" step="500" value="46170" class="w-full">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>10k</span>
+                            <span>Baseline: 46,170</span>
+                            <span>100k</span>
+                        </div>
+                    </div>
+
+                    <!-- Input 2: Conversion Rate -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-cvr" class="font-semibold text-slate-300">E-Commerce Conversion Rate (%)</label>
+                            <span id="display-cvr" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">2.09%</span>
+                        </div>
+                        <input type="range" id="input-cvr" min="0.5" max="6.0" step="0.05" value="2.09" class="w-full">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>0.5%</span>
+                            <span>Desktop: 4.65% | Mobile: 2.27%</span>
+                            <span>6.0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Input 3: Average Order Value -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-aov" class="font-semibold text-slate-300">Average Order Value ($)</label>
+                            <span id="display-aov" class="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">$121.27</span>
+                        </div>
+                        <input type="range" id="input-aov" min="50" max="220" step="1" value="121.27" class="w-full">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>$50</span>
+                            <span>Baseline: $121.27</span>
+                            <span>$220</span>
+                        </div>
+                    </div>
+
+                    <!-- Input 4: Return Rate -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-return-rate" class="font-semibold text-slate-300">Product Return Rate (%)</label>
+                            <span id="display-return-rate" class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">30.26%</span>
+                        </div>
+                        <input type="range" id="input-return-rate" min="5" max="45" step="0.25" value="30.26" class="w-full">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>5% (Target)</span>
+                            <span>Cargo: 36% | Chinos: 20%</span>
+                            <span>45%</span>
+                        </div>
+                    </div>
+
+                    <!-- Input 5: COGS % -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-cogs" class="font-semibold text-slate-300">Cost of Goods Sold (COGS %)</label>
+                            <span id="display-cogs" class="font-mono font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-white/10">30.0%</span>
+                        </div>
+                        <input type="range" id="input-cogs" min="15" max="55" step="1" value="30" class="w-full">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>15%</span>
+                            <span>Standard Apparel: 30%</span>
+                            <span>55%</span>
+                        </div>
+                    </div>
+
+                    <!-- Input 6: Cost Per Return -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <label for="input-cost-per-return" class="font-semibold text-slate-300">Logistics Cost / Return Unit ($)</label>
+                            <span id="display-cost-per-return" class="font-mono font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">$14.29</span>
+                        </div>
+                        <input type="range" id="input-cost-per-return" min="5" max="30" step="0.5" value="14.29" class="w-full">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>$5.00</span>
+                            <span>Baseline Avg: $14.29</span>
+                            <span>$30.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategic Summary Box -->
+                <div class="glass-panel rounded-2xl p-5 border border-sky-500/20 bg-sky-950/20 text-xs space-y-2">
+                    <div class="flex items-center gap-2 font-bold text-sky-400">
+                        <i class="fa-solid fa-circle-info"></i> Advisor Note
+                    </div>
+                    <p class="text-slate-300 leading-relaxed" id="advisor-tip">
+                         Terry's Trousers generates high volume on Baggy Cargos (450 orders), but suffers a massive 36% return rate. Combining mobile checkout UX upgrades with better sizing tools will yield maximum margin expansion.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Right Output Analytics Column (7 cols) -->
+            <section class="lg:col-span-7 space-y-6">
+
+                <!-- Key Results Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Gross Revenue Card -->
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Gross Revenue</div>
+                        <div id="metric-gross-revenue" class="text-2xl font-extrabold font-mono text-white">$117,025</div>
+                        <div id="metric-gross-diff" class="text-xs font-semibold text-slate-500 mt-1">
+                            Baseline: $117,025
+                        </div>
+                        <div class="absolute -right-2 -bottom-2 text-slate-800/40 text-5xl">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                    </div>
+
+                    <!-- Return Loss Card -->
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Return Refunds & Logistics</div>
+                        <div id="metric-return-loss" class="text-2xl font-extrabold font-mono text-rose-400">-$39,584</div>
+                        <div id="metric-returns-count" class="text-xs font-semibold text-rose-400/80 mt-1">
+                            292 Units Returned ($4,172 Shipping)
+                        </div>
+                        <div class="absolute -right-2 -bottom-2 text-rose-950/30 text-5xl">
+                            <i class="fa-solid fa-boxes-lost"></i>
+                        </div>
+                    </div>
+
+                    <!-- Net Recognized Revenue Card -->
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Net Recognized Revenue</div>
+                        <div id="metric-net-revenue" class="text-2xl font-extrabold font-mono text-sky-400">$81,613</div>
+                        <div id="metric-net-orders" class="text-xs font-semibold text-sky-400/80 mt-1">
+                            673 Retained Orders
+                        </div>
+                        <div class="absolute -right-2 -bottom-2 text-sky-950/30 text-5xl">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                    </div>
+
+                    <!-- Estimated Net Profit Card (Glowed) -->
+                    <div class="glass-panel rounded-2xl p-5 border-2 border-emerald-500/40 glow-emerald relative overflow-hidden bg-gradient-to-br from-emerald-950/40 to-slate-900">
+                        <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-1">Projected Net Profit</div>
+                        <div id="metric-net-profit" class="text-3xl font-black font-mono text-emerald-400">$52,957</div>
+                        <div id="metric-profit-lift" class="text-xs font-bold text-emerald-300 mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check"></i> Baseline Scenario
+                        </div>
+                        <div class="absolute -right-2 -bottom-2 text-emerald-500/10 text-6xl">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Comparison Chart -->
+                <div class="glass-panel rounded-2xl p-6 border border-white/10 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-sm text-white">Baseline vs. Simulated Profit Breakdown</h3>
+                            <p class="text-xs text-slate-400">Comparing Revenue, Return Costs, COGS, and Net Profit ($)</p>
+                        </div>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-white/10 font-mono">
+                            Live Sync
+                        </span>
+                    </div>
+
+                    <div class="h-64 w-full">
+                        <canvas id="profitComparisonChart"></canvas>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Empirical Data Audit & Recommendations Section -->
+        <section class="glass-panel rounded-2xl p-6 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                <div>
+                    <h3 class="font-bold text-base text-white flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart text-emerald-400"></i> Terry's Trousers Empirical Baseline Data
+                    </h3>
+                    <p class="text-xs text-slate-400">Summary of website channel traffic and product performance extracted directly from your sales CSV files.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleTable('device')" id="tab-btn-device" class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">Device Breakdown</button>
+                    <button onclick="toggleTable('products')" id="tab-btn-products" class="px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-xs font-medium hover:text-white">Product Returns</button>
+                </div>
+            </div>
+
+            <!-- Device Breakdown Table -->
+            <div id="table-device-container" class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 text-slate-400 font-semibold bg-slate-900/50">
+                            <th class="p-3">Device Category</th>
+                            <th class="p-3">Total Sessions</th>
+                            <th class="p-3">Transactions</th>
+                            <th class="p-3">Conversion Rate</th>
+                            <th class="p-3">Average Order Value</th>
+                            <th class="p-3">Total Revenue</th>
+                            <th class="p-3">Strategic Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 font-mono text-slate-300">
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-sans font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-desktop text-emerald-400"></i> Desktop
+                            </td>
+                            <td class="p-3">20,090 (43.5%)</td>
+                            <td class="p-3 text-emerald-400 font-bold">935</td>
+                            <td class="p-3 text-emerald-400 font-bold">4.65%</td>
+                            <td class="p-3">$89.93</td>
+                            <td class="p-3 font-bold text-white">$84,088.50</td>
+                            <td class="p-3 font-sans text-slate-400">Maintain High Performing Funnel</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30 bg-rose-950/10">
+                            <td class="p-3 font-sans font-bold text-rose-300 flex items-center gap-2">
+                                <i class="fa-solid fa-mobile-screen text-rose-400"></i> Mobile
+                            </td>
+                            <td class="p-3 text-rose-300 font-bold">24,960 (54.1%)</td>
+                            <td class="p-3">566</td>
+                            <td class="p-3 text-rose-400 font-bold">2.27% ⚠️</td>
+                            <td class="p-3">$71.81</td>
+                            <td class="p-3 font-bold text-white">$40,643.70</td>
+                            <td class="p-3 font-sans text-rose-300 font-semibold">Priority 1: Implement One-Click Pay</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-sans font-bold text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-tablet-screen-button text-slate-400"></i> Tablet
+                            </td>
+                            <td class="p-3">1,120 (2.4%)</td>
+                            <td class="p-3">28</td>
+                            <td class="p-3">2.50%</td>
+                            <td class="p-3">$91.07</td>
+                            <td class="p-3 font-bold text-white">$2,550.00</td>
+                            <td class="p-3 font-sans text-slate-400">Niche Traffic Segment</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Product Returns Table (Hidden by default) -->
+            <div id="table-products-container" class="overflow-x-auto hidden">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 text-slate-400 font-semibold bg-slate-900/50">
+                            <th class="p-3">Product Line</th>
+                            <th class="p-3">Orders</th>
+                            <th class="p-3">AOV</th>
+                            <th class="p-3">Gross Revenue</th>
+                            <th class="p-3">Return Rate</th>
+                            <th class="p-3">Returned Units</th>
+                            <th class="p-3">Direct Logistics Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 font-mono text-slate-300">
+                        <tr class="hover:bg-slate-800/30 bg-amber-950/10">
+                            <td class="p-3 font-sans font-bold text-amber-300">Baggy Cargo</td>
+                            <td class="p-3 font-bold text-white">450 (46.6%)</td>
+                            <td class="p-3">$140.00</td>
+                            <td class="p-3">$63,000.00</td>
+                            <td class="p-3 text-rose-400 font-bold">36.0% ⚠️</td>
+                            <td class="p-3 text-rose-400">162 units</td>
+                            <td class="p-3 text-rose-400">$2,430.00</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-sans font-bold text-white">Slim-Fit Denim</td>
+                            <td class="p-3">200</td>
+                            <td class="p-3">$110.00</td>
+                            <td class="p-3">$22,000.00</td>
+                            <td class="p-3 text-amber-400 font-bold">28.0%</td>
+                            <td class="p-3">56 units</td>
+                            <td class="p-3">$784.00</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-sans font-bold text-white">Wool Dress Trousers</td>
+                            <td class="p-3">110</td>
+                            <td class="p-3">$125.00</td>
+                            <td class="p-3">$13,750.00</td>
+                            <td class="p-3 text-amber-400 font-bold">30.0%</td>
+                            <td class="p-3">33 units</td>
+                            <td class="p-3">$445.50</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-sans font-bold text-white">Classic Chinos</td>
+                            <td class="p-3">120</td>
+                            <td class="p-3">$85.00</td>
+                            <td class="p-3">$10,200.00</td>
+                            <td class="p-3 text-emerald-400 font-bold">20.0%</td>
+                            <td class="p-3">24 units</td>
+                            <td class="p-3">$300.00</td>
+                        </tr>
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-3 font-sans font-bold text-white">Corduroy Slacks</td>
+                            <td class="p-3">85</td>
+                            <td class="p-3">$95.00</td>
+                            <td class="p-3">$8,075.00</td>
+                            <td class="p-3 text-emerald-400 font-bold">20.0%</td>
+                            <td class="p-3">17 units</td>
+                            <td class="p-3">$212.50</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Baseline Financial Data from CSV Analysis
+        const BASELINE = {
+            sessions: 46170,
+            cvr: 2.09,
+            aov: 121.27,
+            returnRate: 30.26,
+            cogsPct: 30.0,
+            costPerReturn: 14.29
+        };
+
+        // Chart Instance
+        let profitChart = null;
+
+        // DOM Element Cache
+        const inputs = {
+            sessions: document.getElementById('input-sessions'),
+            cvr: document.getElementById('input-cvr'),
+            aov: document.getElementById('input-aov'),
+            returnRate: document.getElementById('input-return-rate'),
+            cogs: document.getElementById('input-cogs'),
+            costPerReturn: document.getElementById('input-cost-per-return')
+        };
+
+        const displays = {
+            sessions: document.getElementById('display-sessions'),
+            cvr: document.getElementById('display-cvr'),
+            aov: document.getElementById('display-aov'),
+            returnRate: document.getElementById('display-return-rate'),
+            cogs: document.getElementById('display-cogs'),
+            costPerReturn: document.getElementById('display-cost-per-return')
+        };
+
+        // Initialize Calculator on Page Load
+        window.addEventListener('load', () => {
+            initChart();
+            setupEventListeners();
+            calculateMetrics();
+        });
+
+        // Setup input change event listeners
+        function setupEventListeners() {
+            Object.keys(inputs).forEach(key => {
+                inputs[key].addEventListener('input', () => {
+                    updateDisplayValues();
+                    calculateMetrics();
+                    document.getElementById('active-preset-badge').innerText = "Custom Configuration";
+                    document.getElementById('active-preset-badge').className = "text-xs font-bold bg-slate-800 text-sky-400 px-3 py-1 rounded-full border border-sky-500/30";
+                });
+            });
+        }
+
+        // Update Slider Badge Displays
+        function updateDisplayValues() {
+            displays.sessions.innerText = parseInt(inputs.sessions.value).toLocaleString();
+            displays.cvr.innerText = parseFloat(inputs.cvr.value).toFixed(2) + '%';
+            displays.aov.innerText = '$' + parseFloat(inputs.aov.value).toFixed(2);
+            displays.returnRate.innerText = parseFloat(inputs.returnRate.value).toFixed(2) + '%';
+            displays.cogs.innerText = parseFloat(inputs.cogs.value).toFixed(1) + '%';
+            displays.costPerReturn.innerText = '$' + parseFloat(inputs.costPerReturn.value).toFixed(2);
+        }
+
+        // Calculate Core Financial Model
+        function calculateFinancials(params) {
+            const orders = params.sessions * (params.cvr / 100);
+            const grossRevenue = orders * params.aov;
+            const returnUnits = orders * (params.returnRate / 100);
+            const refundLoss = returnUnits * params.aov;
+            const logisticsReturnCost = returnUnits * params.costPerReturn;
+            const totalReturnLoss = refundLoss + logisticsReturnCost;
+            
+            const netRecognizedRevenue = grossRevenue - refundLoss;
+            const cogsCost = netRecognizedRevenue * (params.cogsPct / 100);
+            const netProfit = netRecognizedRevenue - cogsCost - logisticsReturnCost;
+
+            return {
+                orders: Math.round(orders),
+                grossRevenue: grossRevenue,
+                returnUnits: Math.round(returnUnits),
+                refundLoss: refundLoss,
+                logisticsReturnCost: logisticsReturnCost,
+                totalReturnLoss: totalReturnLoss,
+                netRecognizedRevenue: netRecognizedRevenue,
+                cogsCost: cogsCost,
+                netProfit: netProfit
+            };
+        }
+
+        // Calculate baseline model
+        const baselineResults = calculateFinancials(BASELINE);
+
+        // Calculate & Render Live UI Results
+        function calculateMetrics() {
+            const currentParams = {
+                sessions: parseFloat(inputs.sessions.value),
+                cvr: parseFloat(inputs.cvr.value),
+                aov: parseFloat(inputs.aov.value),
+                returnRate: parseFloat(inputs.returnRate.value),
+                cogsPct: parseFloat(inputs.cogs.value),
+                costPerReturn: parseFloat(inputs.costPerReturn.value)
+            };
+
+            const sim = calculateFinancials(currentParams);
+
+            // Update UI Cards
+            document.getElementById('metric-gross-revenue').innerText = '$' + Math.round(sim.grossRevenue).toLocaleString();
+            
+            const grossDiff = sim.grossRevenue - baselineResults.grossRevenue;
+            const grossDiffElem = document.getElementById('metric-gross-diff');
+            if (Math.abs(grossDiff) < 10) {
+                grossDiffElem.innerText = 'Baseline: $117,025';
+                grossDiffElem.className = 'text-xs font-semibold text-slate-400 mt-1';
+            } else if (grossDiff > 0) {
+                grossDiffElem.innerText = '+$' + Math.round(grossDiff).toLocaleString() + ' vs baseline';
+                grossDiffElem.className = 'text-xs font-semibold text-emerald-400 mt-1';
+            } else {
+                grossDiffElem.innerText = '-$' + Math.round(Math.abs(grossDiff)).toLocaleString() + ' vs baseline';
+                grossDiffElem.className = 'text-xs font-semibold text-rose-400 mt-1';
+            }
+
+            document.getElementById('metric-return-loss').innerText = '-$' + Math.round(sim.totalReturnLoss).toLocaleString();
+            document.getElementById('metric-returns-count').innerText = `${sim.returnUnits.toLocaleString()} Returned Units ($${Math.round(sim.logisticsReturnCost).toLocaleString()} Shipping)`;
+
+            document.getElementById('metric-net-revenue').innerText = '$' + Math.round(sim.netRecognizedRevenue).toLocaleString();
+            document.getElementById('metric-net-orders').innerText = `${(sim.orders - sim.returnUnits).toLocaleString()} Retained Orders`;
+
+            document.getElementById('metric-net-profit').innerText = '$' + Math.round(sim.netProfit).toLocaleString();
+
+            const profitDiff = sim.netProfit - baselineResults.netProfit;
+            const profitPctChange = (profitDiff / baselineResults.netProfit) * 100;
+            const profitLiftElem = document.getElementById('metric-profit-lift');
+
+            if (Math.abs(profitDiff) < 10) {
+                profitLiftElem.innerHTML = '<i class="fa-solid fa-circle-check"></i> Baseline Scenario';
+                profitLiftElem.className = 'text-xs font-bold text-slate-300 mt-1';
+            } else if (profitDiff > 0) {
+                profitLiftElem.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> +$${Math.round(profitDiff).toLocaleString()} (+${profitPctChange.toFixed(1)}% Profit Lift)`;
+                profitLiftElem.className = 'text-xs font-bold text-emerald-300 mt-1';
+            } else {
+                profitLiftElem.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> -$${Math.round(Math.abs(profitDiff)).toLocaleString()} (${profitPctChange.toFixed(1)}% Profit Drop)`;
+                profitLiftElem.className = 'text-xs font-bold text-rose-300 mt-1';
+            }
+
+            // Update Dynamic Chart Data
+            updateChartData(sim);
+        }
+
+        // Initialize Chart.js
+        function initChart() {
+            const ctx = document.getElementById('profitComparisonChart').getContext('2d');
+            
+            profitChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Gross Revenue', 'Refund Losses', 'Return Logistics', 'COGS Cost', 'Net Profit'],
+                    datasets: [
+                        {
+                            label: 'Baseline ($)',
+                            data: [
+                                baselineResults.grossRevenue,
+                                baselineResults.refundLoss,
+                                baselineResults.logisticsReturnCost,
+                                baselineResults.cogsCost,
+                                baselineResults.netProfit
+                            ],
+                            backgroundColor: 'rgba(148, 163, 184, 0.4)',
+                            borderColor: 'rgba(148, 163, 184, 0.8)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Simulated Scenario ($)',
+                            data: [
+                                baselineResults.grossRevenue,
+                                baselineResults.refundLoss,
+                                baselineResults.logisticsReturnCost,
+                                baselineResults.cogsCost,
+                                baselineResults.netProfit
+                            ],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Plus Jakarta Sans', size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + Math.round(context.raw).toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8', font: { size: 10 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 10 },
+                                callback: function(value) { return '$' + (value / 1000) + 'k'; }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Chart Data Smoothly
+        function updateChartData(sim) {
+            if (!profitChart) return;
+
+            profitChart.data.datasets[1].data = [
+                sim.grossRevenue,
+                sim.refundLoss,
+                sim.logisticsReturnCost,
+                sim.cogsCost,
+                sim.netProfit
+            ];
+
+            profitChart.update('none');
+        }
+
+        // Strategic Scenario Presets
+        function applyPreset(type) {
+            const badge = document.getElementById('active-preset-badge');
+            const tip = document.getElementById('advisor-tip');
+
+            if (type === 'baseline') {
+                inputs.sessions.value = BASELINE.sessions;
+                inputs.cvr.value = BASELINE.cvr;
+                inputs.aov.value = BASELINE.aov;
+                inputs.returnRate.value = BASELINE.returnRate;
+                inputs.cogs.value = BASELINE.cogsPct;
+                inputs.costPerReturn.value = BASELINE.costPerReturn;
+
+                badge.innerText = "Baseline (Current State)";
+                badge.className = "text-xs font-bold bg-slate-800 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30";
+                tip.innerHTML = "<strong>Baseline Audit:</strong> Terry's Trousers currently runs 46,170 visits generating $117,025 gross, but loses 30.2% of orders to returns ($39.5k in refunds & shipping costs).";
+            } else if (type === 'mobile_checkout') {
+                // Mobile CVR boost: overall CVR increases from 2.09% to 2.95%
+                inputs.sessions.value = BASELINE.sessions;
+                inputs.cvr.value = 2.95;
+                inputs.aov.value = 125.00;
+                inputs.returnRate.value = BASELINE.returnRate;
+                inputs.cogs.value = BASELINE.cogsPct;
+                inputs.costPerReturn.value = BASELINE.costPerReturn;
+
+                badge.innerText = "Strategy 1: Mobile UX Optimization";
+                badge.className = "text-xs font-bold bg-sky-950 text-sky-400 px-3 py-1 rounded-full border border-sky-500/30";
+                tip.innerHTML = "<strong>Mobile Focus:</strong> Mobile sessions make up 54% of traffic but convert at only 2.27%. Implementing Apple Pay & express mobile checkout lifts total CVR to 2.95%, adding over $48k in gross revenue.";
+            } else if (type === 'returns_reduction') {
+                // Return rate drops from 30.26% to 18.0%
+                inputs.sessions.value = BASELINE.sessions;
+                inputs.cvr.value = BASELINE.cvr;
+                inputs.aov.value = BASELINE.aov;
+                inputs.returnRate.value = 18.00;
+                inputs.cogs.value = BASELINE.cogsPct;
+                inputs.costPerReturn.value = 12.50;
+
+                badge.innerText = "Strategy 2: Fit & Sizing Optimization";
+                badge.className = "text-xs font-bold bg-emerald-950 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30";
+                tip.innerHTML = "<strong>Return Fix:</strong> Baggy Cargo has a 36% return rate. Adding 3D fit recommenders and true-to-size model guides cuts return rates to 18%, saving over $16k in refund losses and shipping fees.";
+            } else if (type === 'max_growth') {
+                // Max strategy combination
+                inputs.sessions.value = 52000;
+                inputs.cvr.value = 3.40;
+                inputs.aov.value = 132.00;
+                inputs.returnRate.value = 16.00;
+                inputs.cogs.value = 28.0;
+                inputs.costPerReturn.value = 12.00;
+
+                badge.innerText = "Strategy 3: Combined Maximum Profit";
+                badge.className = "text-xs font-bold bg-amber-950 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30";
+                tip.innerHTML = "<strong>Maximum Expansion:</strong> Combining mobile conversion tuning, sizing tools for Baggy Cargo/Slim Denim, and ad spend shift from Paid Social to Email/Paid Search nearly triples Net Profit!";
+            }
+
+            updateDisplayValues();
+            calculateMetrics();
+        }
+
+        function resetToBaseline() {
+            applyPreset('baseline');
+        }
+
+        // Toggle Table Views
+        function toggleTable(type) {
+            const devTable = document.getElementById('table-device-container');
+            const prodTable = document.getElementById('table-products-container');
+            const btnDev = document.getElementById('tab-btn-device');
+            const btnProd = document.getElementById('tab-btn-products');
+
+            if (type === 'device') {
+                devTable.classList.remove('hidden');
+                prodTable.classList.add('hidden');
+                btnDev.className = "px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30";
+                btnProd.className = "px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-xs font-medium hover:text-white";
+            } else {
+                devTable.classList.add('hidden');
+                prodTable.classList.remove('hidden');
+                btnProd.className = "px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30";
+                btnDev.className = "px-3 py-1 rounded-lg bg-slate-800 text-slate-400 text-xs font-medium hover:text-white";
+            }
+        }
+
+        // Theme Switcher Function
+        function setTheme(themeName) {
+            document.body.className = `theme-${themeName} min-h-screen pb-16`;
+            
+            const buttons = ['obsidian', 'navy', 'editorial', 'terracotta'];
+            buttons.forEach(b => {
+                const btn = document.getElementById(`btn-theme-${b}`);
+                if (b === themeName) {
+                    btn.className = "px-2.5 py-1 rounded-lg text-emerald-400 font-semibold bg-emerald-500/20 border border-emerald-500/30 transition";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-lg text-slate-400 font-medium hover:text-white transition";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
